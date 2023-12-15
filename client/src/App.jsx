@@ -3,6 +3,8 @@
 import React, { useState } from "react";
 import Navbar from "./components/Navbar";
 import { useSelector, useDispatch } from "react-redux";
+import { Button, message } from 'antd';
+
 
 import "./assets/styles/App.css";
 
@@ -31,9 +33,13 @@ function App() {
 
   const handleSubmit = (event) => {
     event.preventDefault();
-    // Log the data in the console
+    let loadingMessage = message.loading({type: "loading", content: "sending message ...", duration:0})
+
     console.log('Image:', img);
     console.log('Textarea:', textareaValue);
+    setTimeout(()=>{
+loadingMessage()
+    },3000)
   };
 
 
