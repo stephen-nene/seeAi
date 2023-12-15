@@ -1,122 +1,99 @@
-import React, { useState, useRef } from 'react';
-import { useSelector, useDispatch } from 'react-redux';
-import Navbar from './components/Navbar';
+// src/App.js
 
-import './assets/styles/App.css';
+import React, { useState } from "react";
+import Navbar from "./components/Navbar";
+import { useSelector, useDispatch } from "react-redux";
+
+import "./assets/styles/App.css";
 
 function App() {
-  const darkMode = useSelector((state) => state.app.darkMode);
-  const [img, setImg] = useState('');
+  const [img, setImg] = useState("");
   const [upload, setUpload] = useState(true);
-  const [errors, setErrors] = useState('');
-  const videoRef = useRef();
-  const canvasRef = useRef();
+  const [errors, setErrors] = useState("");
+  const [showTextarea, setShowTextarea] = useState(false);
+  const [textareaValue, setTextareaValue] = useState('');
 
-  const startCamera = async () => {
+  const darkMode = useSelector((state) => state.app.darkMode);
+
+  const takePhoto = async (event) => {
     try {
-      const stream = await navigator.mediaDevices.getUserMedia({ video: true });
-      videoRef.current.srcObject = stream;
+      const file = event.target.files[0];
+
+      if (file) {
+        const photoDataUrl = URL.createObjectURL(file);
+        setImg(photoDataUrl);
+      }
     } catch (error) {
-      setErrors('Error accessing camera: ' + error.message);
-      console.error('Error accessing camera:', error);
+      setErrors("Error accessing camera: " + error.message);
+      console.error("Error accessing camera:", error);
     }
   };
 
-  const takePhoto = () => {
-    const video = videoRef.current;
-    const canvas = canvasRef.current;
-    const context = canvas.getContext('2d');
-
-    // Set the canvas dimensions to match the video feed
-    canvas.width = video.videoWidth;
-    canvas.height = video.videoHeight;
-
-    // Draw the current frame from the video onto the canvas
-    context.drawImage(video, 0, 0, canvas.width, canvas.height);
-
-    // Convert the canvas content to a data URL (base64-encoded PNG)
-    const photoDataUrl = canvas.toDataURL('image/png');
-    setImg(photoDataUrl);
+  const handleSubmit = (event) => {
+    event.preventDefault();
+    // Log the data in the console
+    console.log('Image:', img);
+    console.log('Textarea:', textareaValue);
   };
 
-  const stopCamera = () => {
-    const stream = videoRef.current.srcObject;
-    const tracks = stream.getTracks();
-
-    // Stop all tracks to release the camera
-    tracks.forEach((track) => track.stop());
-
-    // Clear the photo
-    setImg(null);
-  };
-
-  const dispatch = useDispatch();
 
   return (
-    <div className={`bg-gray-100 min-h-screen ${darkMode ? 'dark' : ''}`}>
-      <Navbar darkMode={darkMode} />
-      <div className="m-4">
-        {/* Switch to toggle upload state */}
-        <label className="flex items-center space-x-2">
-          <input
-            type="checkbox"
-            checked={upload}
-            onChange={() => setUpload(!upload)}
-            className="form-checkbox h-5 w-5 text-blue-600"
-          />
-          <span className="text-lg font-medium">Upload</span>
-        </label>
+    <>
+      <div className={`${darkMode ? "bg-gray-500" : "bg-gray-200"}`}>
+        <Navbar darkMode={darkMode} />
+        <div className="min-h-screen ">
+          {/* <button onClick={()=>setUpload(!upload)}>{upload?"capture":"upload"}</button> */}
+<form className="m-4 flex flex-col items-centr" onSubmit={handleSubmit}>
 
-        {upload ? (
-          <div className="mt-4">
-            <video ref={videoRef} autoPlay className="w-full rounded" />
-            <div className="flex justify-center space-x-4 mt-4">
-              <button
-                onClick={startCamera}
-                className="bg-green-500 text-white py-2 px-4 rounded"
-              >
-                Start Camera
-              </button>
-              <button
-                onClick={takePhoto}
-                className="bg-blue-500 text-white py-2 px-4 rounded"
-              >
-                Take Photo
-              </button>
-            </div>
-          </div>
-        ) : (
-          <div>{/* camera capture function */}</div>
-        )}
-        {img && (
-          <div className="mt-4">
-            <img src={img} alt="Captured" className="w-full rounded" />
-            <button
-              onClick={stopCamera}
-              className="bg-red-500 text-white py-2 px-4 mt-2 rounded"
-            >
-              Retake Photo
+          <div className="m-4 flex flex-col justify-center items-center">
+            <label className="text-lg font-medium mb-4">Capture Photo</label>
+            <button>
+              <input type="file" required onChange={takePhoto} accept="image/*" />
             </button>
           </div>
-        )}
-        {errors && <p className="text-red-500 mt-2">{errors}</p>}
+
+          <div className="m-4 flex flex-col justify-center items-cente">
+            {img && (
+              <div className="mt-4">
+                <img src={img} alt="Captured" className="w-full rounded" />
+              </div>
+            )}
+
+            {errors && <p className="text-red-500 mt-2">{errors}</p>}
+          </div>
+
+          <div className="m-4">
+            <div className="flex gap-3 items-center">
+              <input
+                type="checkbox"
+                checked={showTextarea}
+                onChange={() => setShowTextarea(!showTextarea)}
+                id="che"
+              />
+              <label htmlFor="che">Ask SeeAi?</label>
+            </div>
+            {showTextarea && (
+              <div className="mt-5">
+                <textarea
+                  className="text-black border-2 w-full p-2 rounded-md"
+                  placeholder="Ask me something about your image?"
+                  rows="5"
+                  value={textareaValue}
+                  onChange={(e) => setTextareaValue(e.target.value)}
+                ></textarea>
+              </div>
+            )}
+
+<button type="submit" className="bg-blue-500 text-white py-2 px-4 mt-2 rounded">
+            Lets see
+          </button>
+            {/* You can add other components as needed */}
+          </div>
+</form>
+
+        </div>
       </div>
-      <canvas ref={canvasRef} style={{ display: 'none' }} />
-
-      {/* Additional components (textarea, capture button, image preview) */}
-      {/* Prompt textarea */}
-      <textarea
-        className="mt-4 p-2 border border-gray-300 rounded"
-        placeholder="Enter your prompt here"
-        rows="5"
-        cols="30"
-      ></textarea>
-
-      {/* Capture button */}
-      <button className="mt-4 bg-blue-500 text-white py-2 px-4 rounded">
-        Capture
-      </button>
-    </div>
+    </>
   );
 }
 
