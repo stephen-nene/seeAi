@@ -1,89 +1,88 @@
 
-# ######################################################################################################
-# # In this section, we set the user authentication, user and app ID, model details, and the URL of 
-# # the text we want as an input. Change these strings to run your own example.
-# ######################################################################################################
+import os
+from dotenv import load_dotenv
 
-# # Your PAT (Personal Access Token) can be found in the portal under Authentification
-# PAT = '0b875c04e200473d8c3057797c8b72fb'
-# # Specify the correct user_id/app_id pairings
-# # Since you're making inferences outside your app's scope
-# USER_ID = 'openai'
-# APP_ID = 'chat-completion'
-# # Change these to whatever model and text URL you want to use
-# MODEL_ID = 'gpt-4-vision-alternative'
-# MODEL_VERSION_ID = '12b67ac2b5894fb9af9c06ebf8dc02fb'
-# RAW_TEXT = 'the fastes electric car?'
-# # To use a hosted text file, assign the url variable
-# TEXT_FILE_URL = '../test.webp'
-# # Or, to use a local text file, assign the url variable
-# # TEXT_FILE_LOCATION = 'YOUR_TEXT_FILE_LOCATION_HERE'
-# image_file_path = "../test.webp"
+# Load environment variables from .env file
+load_dotenv()
 
-# ############################################################################
-# # YOU DO NOT NEED TO CHANGE ANYTHING BELOW THIS LINE TO RUN THIS EXAMPLE
-# ############################################################################
+# Access the clarifai_api_key
+model_version_id = os.getenv("MODEL_VERSION_ID")
+pat = os.getenv("PAT")
 
-# from clarifai_grpc.channel.clarifai_channel import ClarifaiChannel
-# from clarifai_grpc.grpc.api import resources_pb2, service_pb2, service_pb2_grpc
-# from clarifai_grpc.grpc.api.status import status_code_pb2
+######################################################################################################
+# In this section, we set the user authentication, user and app ID, model details, and the URL of 
+# the text we want as an input. Change these strings to run your own example.
+######################################################################################################
 
-# channel = ClarifaiChannel.get_grpc_channel()
-# stub = service_pb2_grpc.V2Stub(channel)
+# Your PAT (Personal Access Token) can be found in the portal under Authentification
 
-# metadata = (('authorization', 'Key ' + PAT),)
-
-# userDataObject = resources_pb2.UserAppIDSet(user_id=USER_ID, app_id=APP_ID)
-
-# # To use a local text file, uncomment the following lines
-# # with open(TEXT_FILE_LOCATION, "rb") as f:
-# #    file_bytes = f.read()
-
-# post_model_outputs_response = stub.PostModelOutputs(
-#     service_pb2.PostModelOutputsRequest(
-#         user_app_id=userDataObject,  # The userDataObject is created in the overview and is required when using a PAT
-#         model_id=MODEL_ID,
-#         version_id=MODEL_VERSION_ID,  # This is optional. Defaults to the latest model version
-#         inputs=[
-#             resources_pb2.Input(
-#                 data=resources_pb2.Data(
-#                     # image=resources_pb2.Image(
-#                     #     url=TEXT_FILE_URL,
-#                     #     # base64=image_file_path
-#                     # ),
-#                     text=resources_pb2.Text(
-#                         # url=TEXT_FILE_URL,
-#                         raw=RAW_TEXT
-#                         # raw=file_bytes
-#                     )
-#                 )
-#             )
-#         ]
-#     ),
-#     metadata=metadata
-# )
-# if post_model_outputs_response.status.code != status_code_pb2.SUCCESS:
-#     print(post_model_outputs_response.status)
-#     raise Exception(f"Post model outputs failed, status: {post_model_outputs_response.status}")
-
-# # Since we have one input, one output will exist here
-# output = post_model_outputs_response.outputs[0]
-
-# print("Completion:\n")
-# print(output.data.text.raw)
+# Specify the correct user_id/app_id pairings
+# Since you're making inferences outside your app's scope
+USER_ID = 'openai'
+APP_ID = 'chat-completion'
+# Change these to whatever model and text URL you want to use
+MODEL_ID = 'general-image-recognition'
+RAW_TEXT = 'explain to me like a child difference bnetween supercharger and turbo charger?'
+# To use a hosted text file, assign the url variable
+# TEXT_FILE_URL = 'https://upload.wikimedia.org/wikipedia/commons/thumb/8/8d/Sam_Altman_CropEdit_James_Tamim.jpg/220px-Sam_Altman_CropEdit_James_Tamim.jpg'
+TEXT_FILE_URL = "https://samples.clarifai.com/metro-north.jpg"
+# Or, to use a local text file, assign the url variable
+# TEXT_FILE_LOCATION = 'YOUR_TEXT_FILE_LOCATION_HERE'
 
 
+############################################################################
+# YOU DO NOT NEED TO CHANGE ANYTHING BELOW THIS LINE TO RUN THIS EXAMPLE
+############################################################################
 
-from clarifai.client.model import Model
+from clarifai_grpc.channel.clarifai_channel import ClarifaiChannel
+from clarifai_grpc.grpc.api import resources_pb2, service_pb2, service_pb2_grpc
+from clarifai_grpc.grpc.api.status import status_code_pb2
 
-prompt = "What’s in this image?"
+channel = ClarifaiChannel.get_grpc_channel()
+stub = service_pb2_grpc.V2Stub(channel)
 
-image_url = "https://upload.wikimedia.org/wikipedia/commons/thumb/d/dd/Gfp-wisconsin-madison-the-nature-boardwalk.jpg/2560px-Gfp-wisconsin-madison-the-nature-boardwalk.jpg"
+metadata = (('authorization', 'Key ' + pat),)
 
-openai_api_key = "0b875c04e200473d8c3057797c8b72fb"
+userDataObject = resources_pb2.UserAppIDSet(user_id=USER_ID, app_id=APP_ID)
 
-inference_params = dict(temperature=0.2, max_tokens=100, image_url=image_url, api_key = openai_api_key)
+# Get the absolute path of the script's directory
+script_dir = os.path.dirname(os.path.abspath(__file__))
 
-# Model Predict
-model_prediction = Model("https://clarifai.com/openai/chat-completion/models/gpt-4-vision").predict_by_bytes(prompt.encode(), input_type="text", inference_params=inference_params)
-print(model_prediction.outputs[0].data.text.raw)
+# Construct the absolute path to the image file
+image_file_path = os.path.join(script_dir, "images", "newer.jpg")
+
+# To use a local text file, uncomment the following lines
+with open(image_file_path, "rb") as f:
+   file_bytes = f.read()
+
+post_model_outputs_response = stub.PostModelOutputs(
+    service_pb2.PostModelOutputsRequest(
+        user_app_id=userDataObject,  # The userDataObject is created in the overview and is required when using a PAT
+        model_id=MODEL_ID,
+        # version_id=model_version_id,  # This is optional. Defaults to the latest model version
+        inputs=[
+            resources_pb2.Input(
+                data=resources_pb2.Data(
+                    image=resources_pb2.Image(
+                        url=TEXT_FILE_URL,
+                        # base64= file_bytes
+                    ),
+                    # text=resources_pb2.Text(
+                    #     raw=RAW_TEXT,
+                    #     # raw=file_bytes
+                    # )
+                )
+            )
+        ]
+    ),
+    metadata=metadata
+)
+if post_model_outputs_response.status.code != status_code_pb2.SUCCESS:
+    print(post_model_outputs_response.status)
+    raise Exception(f"Post model outputs failed, status: {post_model_outputs_response.status}")
+
+# Since we have one input, one output will exist here
+output = post_model_outputs_response.outputs[0]
+
+print("Completion:\n")
+print(output.data.text.raw)
