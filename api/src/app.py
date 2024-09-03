@@ -1,75 +1,44 @@
-from flask import Flask, jsonify, request
-from flask_cors import CORS  # Import the CORS module
-from clarifai_grpc.channel.clarifai_channel import ClarifaiChannel
-from clarifai_grpc.grpc.api import resources_pb2, service_pb2, service_pb2_grpc
-from clarifai_grpc.grpc.api.status import status_code_pb2
+from flask import Flask, request, jsonify
+from flask_cors import CORS
+from clarifai.client.model import Model
+import base64
 import os
 from dotenv import load_dotenv
 
-app = Flask(__name__)
-CORS(app)  # Enable CORS for all routes in your Flask app
-
-# Load environment variables from .env file
 load_dotenv()
 
-# Access the clarifai_api_key
-pat = os.getenv("PAT")
-USER_ID = 'openai'
-APP_ID = 'chat-completion'
-MODEL_ID = 'openai-gpt-4-vision'
+app = Flask(__name__)
+CORS(app, resources={r"/api/*": {"origins": "*"}})
 
-# Get the absolute path of the script's directory
-script_dir = os.path.dirname(os.path.abspath(__file__))
 
-# Construct the absolute path to the image file
-image_file_path = os.path.join(script_dir, "images", "new.jpg")
+PAT = os.getenv('PAT')
+MODEL_URL = os.getenv('MODEL_URL')
 
-# Clarifai gRPC channel setup
-channel = ClarifaiChannel.get_grpc_channel()
-stub = service_pb2_grpc.V2Stub(channel)
-metadata = (('authorization', 'Key ' + pat),)
-userDataObject = resources_pb2.UserAppIDSet(user_id=USER_ID, app_id=APP_ID)
-
+model = Model(url=MODEL_URL, pat=PAT)
 
 @app.route('/api/image', methods=['POST'])
-def process_image_input():
-    data = request.get_json()
-    raw_text = data.get('raw_text', '')
-    imgurl = data.get('image', '')
-    
+def process_image():
+    try:
+        data = request.get_json()
+        base64_image = data.get('base64_image')
 
-    with open(image_file_path, "rb") as f:
-        file_bytes = f.read()
+        if not base64_image:
+            return jsonify({"error": "No base64 image provided."}), 400
 
-    post_model_outputs_response = stub.PostModelOutputs(
-        service_pb2.PostModelOutputsRequest(
-            user_app_id=userDataObject,
-            model_id=MODEL_ID,
-            inputs=[
-                resources_pb2.Input(
-                data=resources_pb2.Data(
-                    image=resources_pb2.Image(
-                        # url=imgurl,
-                        base64= imgurl
-                    ),
-                    text=resources_pb2.Text(
-                        raw=raw_text
-                        # url=TEXT_FILE_URL
-                        # raw=file_bytes
-                    )
-                )
-            
-                )
-            ]
-        ),
-        metadata=metadata
-    )
+        try:
+            image_bytes = base64.b64decode(base64_image, validate=True)
+        except (base64.binascii.Error, TypeError) as e:
+            return jsonify({"error": "Invalid base64 encoding."}), 400
 
-    if post_model_outputs_response.status.code != status_code_pb2.SUCCESS:
-        return jsonify({'error': f"Post model outputs failed, status: {post_model_outputs_response.status.description}"}), 500
+        model_prediction = model.predict_by_bytes(image_bytes, input_type="image")
+        output_text = model_prediction.outputs[0].data.text.raw
 
-    output = post_model_outputs_response.outputs[0]
-    return jsonify({'completion': output.data.text.raw})
+        return jsonify({"output": output_text})
+
+    except Exception as e:
+        print("Error processing image:", e)
+        return jsonify({"error": "Something went wrong processing the image."}), 500
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run(port=8000, debug=False)  # Ensure debug mode is off
+    # app.run(host='0.0.0.0', port=5000, debug=True)

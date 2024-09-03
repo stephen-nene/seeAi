@@ -42,9 +42,11 @@ function App() {
 
       // Convert the image to base64
       const base64Image = await convertImageToBase64(img);
+      const apiendpoint='https://seeai.onrender.com/api/image'
+      const apiendpoint2='"http://127.0.0.1:8000/api/image'
 
       // Make a POST request to your backend
-      const response = await fetch("http://127.0.0.1:5000/api/image", {
+      const response = await fetch(apiendpoint, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
