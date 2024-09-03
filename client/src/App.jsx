@@ -3,6 +3,7 @@ import Navbar from "./components/Navbar";
 import { useSelector } from "react-redux";
 import { message } from "antd";
 import Response from "./components/Response";
+import Process from "./components/process";
 
 import "./assets/styles/App.css";
 
@@ -35,7 +36,7 @@ function App() {
     try {
       loadingMessage = message.loading({
         type: "loading",
-        content: "Sending message ...",
+        content: "analysing image, please wait ...",
         duration: 0,
       });
 
@@ -98,7 +99,11 @@ function App() {
     <>
       <div className={`${darkMode ? "bg-gray-800 text-white" : "bg-gray-100 text-gray-900"} min-h-screen`}>
         <Navbar darkMode={darkMode} />
+
         <div className="container mx-auto px-4 py-8">
+        <div className="flex justify-center mt-8">
+          <Process darkMode={darkMode} />
+  </div>
           <form
             className="bg-white shadow-lg rounded-lg p-6 flex flex-col items-center"
             onSubmit={handleSubmit}
@@ -156,6 +161,7 @@ function App() {
             {response && <Response output={response} />}
           </form>
         </div>
+
       </div>
     </>
   );
