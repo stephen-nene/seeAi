@@ -1,3 +1,6 @@
-Flask==2.1.1
-requests==2.26.0
+Flask
+requests
 clarifai
+clarifai-grpc
+python-dotenv
+flask-cors
