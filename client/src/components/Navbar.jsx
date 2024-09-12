@@ -22,15 +22,12 @@ export default function Navbar({ darkMode }) {
         </div>
 
         {/* Navigation links */}
-        <div className="hidden lg:flexs space-x-4">
+        <div className="hiddn lg:flexs space-x-4">
           <Link to="/" className="text-white">
             Home
           </Link>
-          <Link to="/about" className="text-white">
-            About
-          </Link>
-          <Link to="/contact" className="text-white">
-            Contact
+          <Link to="/See" className="text-white">
+            See
           </Link>
         </div>
 
