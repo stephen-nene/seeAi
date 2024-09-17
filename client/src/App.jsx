@@ -17,15 +17,15 @@ function App() {
           darkMode ? "bg-gray-800 text-white" : "bg-gray-100 text-gray-900"
         } min-h-screen`}
       >
-        <Navbar/>
+        <Navbar />
         <div className="container mx-auto px-4 py-8">
-        <div className="flex justify-center mt-8">
-
-        <Routes>
-          <Route path="/" element={<LandingPage darkMode={darkMode} />} />
-          <Route path="/see" element={<See darkMode={darkMode}/>} />
-        </Routes>
-</div></div>
+          <div className="flex justify-center mt-8">
+            <Routes>
+              <Route path="/" element={<LandingPage darkMode={darkMode} />} />
+              <Route path="/see" element={<See darkMode={darkMode} />} />
+            </Routes>
+          </div>
+        </div>
 
         {/* <Navbar darkMode={darkMode} />
         <LandingPage darkMode={darkMode} /> */}

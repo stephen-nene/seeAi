@@ -2,8 +2,6 @@ import React, { useState } from "react";
 import { message } from "antd";
 import Response from "./Response";
 
-
-
 const takePhoto = async (event) => {
   try {
     const file = event.target.files[0];
@@ -92,74 +90,72 @@ export default function See({ darkMode }) {
   const [textareaValue, setTextareaValue] = useState("");
   const [response, setResponse] = useState(""); // State to hold server response
 
-    return (
-      <div
+  return (
+    <div
       className={`${
         darkMode ? "bg-gray-800 text-white" : "bg-gray-100 text-gray-900"
       } min-h-screen`}
     >
-
       <div className="container mx-auto px-4 py-8">
-      <form
-        className="bg-white shadow-lg rounded-lg p-6 flex flex-col items-center"
-        onSubmit={handleSubmit}
-      >
-        <div className="w-full flex flex-col items-center">
-          {img && (
-            <div className="mb-4 flex justify-center">
-              <img
-                src={img}
-                alt="Captured"
-                className="w-full max-w-xs h-auto rounded-lg border border-gray-300"
+        <form
+          className="bg-white shadow-lg rounded-lg p-6 flex flex-col items-center"
+          onSubmit={handleSubmit}
+        >
+          <div className="w-full flex flex-col items-center">
+            {img && (
+              <div className="mb-4 flex justify-center">
+                <img
+                  src={img}
+                  alt="Captured"
+                  className="w-full max-w-xs h-auto rounded-lg border border-gray-300"
+                />
+              </div>
+            )}
+
+            {errors && <p className="text-red-500 mb-4">{errors}</p>}
+          </div>
+          <div className="w-full mb-4 flex flex-col items-center">
+            <button
+              type="button"
+              className="bg-blue-500 text-white py-2 px-4 rounded hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            >
+              <input
+                type="file"
+                onChange={takePhoto}
+                accept="image/*"
+                className="mb-4"
               />
+              {/* Select Image */}
+            </button>
+          </div>
+
+          {showTextarea && (
+            <div className="w-full mb-4">
+              <textarea
+                className="w-full p-2 border border-gray-300 rounded-md"
+                placeholder={`Ask me something ${
+                  img ? "about your image?" : ""
+                }`}
+                rows="5"
+                value={textareaValue}
+                onChange={(e) => setTextareaValue(e.target.value)}
+              ></textarea>
             </div>
           )}
 
-          {errors && <p className="text-red-500 mb-4">{errors}</p>}
-        </div>
-        <div className="w-full mb-4 flex flex-col items-center">
-          <button
-            type="button"
-            className="bg-blue-500 text-white py-2 px-4 rounded hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500"
-          >
-            <input
-              type="file"
-              onChange={takePhoto}
-              accept="image/*"
-              className="mb-4"
-            />
-            {/* Select Image */}
-          </button>
-        </div>
+          {textareaValue || img ? (
+            <button
+              type="submit"
+              className="bg-blue-500 text-white py-2 px-4 rounded hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            >
+              Let's See
+            </button>
+          ) : null}
 
-        {showTextarea && (
-          <div className="w-full mb-4">
-            <textarea
-              className="w-full p-2 border border-gray-300 rounded-md"
-              placeholder={`Ask me something ${
-                img ? "about your image?" : ""
-              }`}
-              rows="5"
-              value={textareaValue}
-              onChange={(e) => setTextareaValue(e.target.value)}
-            ></textarea>
-          </div>
-        )}
-
-        {textareaValue || img ? (
-          <button
-            type="submit"
-            className="bg-blue-500 text-white py-2 px-4 rounded hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500"
-          >
-            Let's See
-          </button>
-        ) : null}
-
-        {/* Show the response if available */}
-        {response && <Response output={response} />}
-      </form>
+          {/* Show the response if available */}
+          {response && <Response output={response} />}
+        </form>
+      </div>
     </div>
-    </div>
-  );  
-
+  );
 }
